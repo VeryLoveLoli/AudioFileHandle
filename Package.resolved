@@ -1,0 +1,52 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "AudioFileInfo",
+        "repositoryURL": "https://gitee.com/cchsora/AudioFileInfo",
+        "state": {
+          "branch": "master",
+          "revision": "a178beea28f0b1ac1c4bf950a27eeab2fa1037a2",
+          "version": null
+        }
+      },
+      {
+        "package": "AudioUnitComponent",
+        "repositoryURL": "https://gitee.com/cchsora/AudioUnitComponent",
+        "state": {
+          "branch": "master",
+          "revision": "8c57e5600259523a12e7747d7e8ea694a568dfe6",
+          "version": null
+        }
+      },
+      {
+        "package": "LinkedList",
+        "repositoryURL": "https://gitee.com/cchsora/LinkedList",
+        "state": {
+          "branch": "master",
+          "revision": "2b8b8cd1f95807f6a48469ac7e8022aab98f2bbb",
+          "version": null
+        }
+      },
+      {
+        "package": "Print",
+        "repositoryURL": "https://gitee.com/cchsora/Print",
+        "state": {
+          "branch": "master",
+          "revision": "61726bb7ce88291df3d567217ee0a43e4e433d22",
+          "version": null
+        }
+      },
+      {
+        "package": "WebRTCNS",
+        "repositoryURL": "https://gitee.com/cchsora/WebRTCNS",
+        "state": {
+          "branch": "master",
+          "revision": "f6381dc56f685d6131a1e10b6e3a8b4794dd3ca6",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}
