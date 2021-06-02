@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "AudioFileHandle",
     platforms: [
-        .iOS(.v12)
+        .iOS(.v10)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
@@ -20,7 +20,7 @@ let package = Package(
         .package(url: "https://gitee.com/cchsora/AudioUnitComponent", .branch("master")),
         .package(url: "https://gitee.com/cchsora/AudioFileInfo", .branch("master")),
         .package(url: "https://gitee.com/cchsora/WebRTCNS", .branch("master")),
-        .package(url: "https://gitee.com/cchsora/Lame", .branch("master")),
+        .package(url: "https://gitee.com/cchsora/Lame", .branch("arm64_armv7")),
         .package(url: "https://gitee.com/cchsora/LinkedList", .branch("master")),
         .package(url: "https://gitee.com/cchsora/Print", .branch("master")),
     ],
