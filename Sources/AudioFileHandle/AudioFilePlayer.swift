@@ -24,13 +24,13 @@ open class AudioFilePlayer: AudioUnitPlayerProtocol {
     /// 文件对象
     private var file: ExtAudioFileRef?
     /// 文件参数
-    open private(set) var basic = AudioStreamBasicDescription()
+    open internal(set) var basic = AudioStreamBasicDescription()
     /// 帧数
-    open private(set) var numbersFrames: Int64 = 0
+    open internal(set) var numbersFrames: Int64 = 0
     /// 时长
-    open private(set) var duration: Double = 0
+    open internal(set) var duration: Double = 0
     /// 播放时转换的参数
-    open private(set) var client: AudioStreamBasicDescription?
+    open internal(set) var client: AudioStreamBasicDescription?
     /// 音频设备参数
     public let component: AudioComponentDescription
     
@@ -38,9 +38,9 @@ open class AudioFilePlayer: AudioUnitPlayerProtocol {
     open var callback: ((Int64,Int64)->Void)?
     
     /// 是否已准备好播放
-    open private(set) var isPrepareToPlaying = false
+    open internal(set) var isPrepareToPlaying = false
     /// 是否在播放
-    open private(set) var isPlaying = false
+    open internal(set) var isPlaying = false
     
     /**
      初始化

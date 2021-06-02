@@ -10,6 +10,7 @@ import AudioToolbox
 import AudioUnitComponent
 import Print
 import WebRTCNSSwift
+import LameSwift
 
 /**
  音频文件录制
@@ -19,13 +20,13 @@ open class AudioFileRecorder: AudioUnitRecorderProtocol {
     /// 队列
     public let queue: DispatchQueue
     /// 音频流录制器
-    open private(set) var recorder: AudioUnitRecorder?
+    open internal(set) var recorder: AudioUnitRecorder?
     /// 文件地址
     public let url: CFURL
     /// 文件对象
     private var file: ExtAudioFileRef?
     /// 录制参数
-    open private(set) var basic: AudioStreamBasicDescription
+    open internal(set) var basic: AudioStreamBasicDescription
     /// 文件类型
     public  let type: AudioFileTypeID
     /// 音频设备参数
@@ -35,26 +36,14 @@ open class AudioFileRecorder: AudioUnitRecorderProtocol {
     open var callback: (([UInt8], UInt32, Int64)->Void)?
     
     /// 是否已准备录制
-    open private(set) var isPrepareToRecording = false
+    open internal(set) var isPrepareToRecording = false
     /// 是否在录制
-    open private(set) var isRecording = false
+    open internal(set) var isRecording = false
     
-    /// WebRTC降噪
+    /// WebRTC降噪（需在`record()`前设置，调用`stop()`后会自动清除）
     open var webRTCNS: WebRTCNSSwift?
-    /// 降噪级别
-    open var noiseLevel: WebRTCNSSwift.Level? {
-        
-        didSet {
-            
-            webRTCNS?.close()
-            webRTCNS = nil
-            
-            if let level = noiseLevel {
-                
-                webRTCNS = WebRTCNSSwift(UInt32(basic.mSampleRate), bitsPer: basic.mBitsPerChannel, channels: Int32(basic.mChannelsPerFrame), level: level)
-            }
-        }
-    }
+    /// Lame MP3 转码（需在`record()`前设置，调用`stop()`后会自动清除）
+    open var lameSwift: LameSwift?
     
     /**
      初始化
@@ -149,10 +138,6 @@ open class AudioFileRecorder: AudioUnitRecorderProtocol {
         
         queue.async {
             
-            /// 重设降噪
-            let level = self.noiseLevel
-            self.noiseLevel = level
-            
             self.start()
             
             dispatchSemaphore.signal()
@@ -190,6 +175,9 @@ open class AudioFileRecorder: AudioUnitRecorderProtocol {
             
             self.webRTCNS?.close()
             self.webRTCNS = nil
+            
+            self.lameSwift?.stop()
+            self.lameSwift = nil
             
             if self.isPrepareToRecording {
                 
@@ -241,6 +229,8 @@ open class AudioFileRecorder: AudioUnitRecorderProtocol {
             /// 写入数据
             ExtAudioFileWrite(file, ioNumberFrames, ioData)
         }
+        
+        lameSwift?.addData(bytes)
         
         if let callback = callback {
             

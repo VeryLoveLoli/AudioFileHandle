@@ -27,6 +27,14 @@ open class AudioFileMixRecorder: AudioFileMixer {
     /// 录制缓冲数据
     var bufferBytes = [UInt8]()
     
+    /**
+     初始化
+     
+     - parameter    inPaths:            输入音频文件路径
+     - parameter    outPath:            输出音频文件路径
+     - parameter    recordPath:         录制音频文件路径
+     - parameter    basicDescription:   音频参数
+     */
     public init?(_ inPaths: [String], outPath: String, recordPath: String, basicDescription: AudioStreamBasicDescription, componentDescription: AudioComponentDescription = .remoteIO()) {
         
         recorder = AudioFileRecorder(recordPath, basicDescription: basicDescription)

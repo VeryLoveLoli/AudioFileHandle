@@ -10,6 +10,7 @@ import AudioToolbox
 import AudioUnitComponent
 import AudioFileInfo
 import Print
+import LameSwift
 
 /**
  音频文件混音器
@@ -29,9 +30,9 @@ open class AudioFileMixer: AudioUnitMixerProtocol {
     /// 读取文件信息列表
     public let readInfoList: [AudioFileReadInfo]
     /// 写入文件信息
-    public let writeInfo: AudioFileWriteInfo
+    open internal(set) var writeInfo: AudioFileWriteInfo
     /// 输出/播放 音频参数
-    public var basic: AudioStreamBasicDescription
+    open internal(set) var basic: AudioStreamBasicDescription
     /// 混音
     public let mixerUnit: AudioUnitMixer
     /// IO
@@ -48,13 +49,19 @@ open class AudioFileMixer: AudioUnitMixerProtocol {
     
     /// 回调（进度，状态）
     open var callback: ((Float, OSStatus)->Void)? = nil
+    /// 输出回调（混音数据，帧数）
+    open var outputCallback: (([UInt8], UInt32)->Void)?
+    
+    /// Lame MP3 转码（需在`start()`前设置，调用`stop()`后会自动清除）
+    open var lameSwift: LameSwift?
     
     /**
      初始化
      
-     - parameter    inPaths:            输入音频文件路径
-     - parameter    outPath:            输出音频文件路径
-     - parameter    basicDescription:   音频参数
+     - parameter    inPaths:                输入音频文件路径
+     - parameter    outPath:                输出音频文件路径
+     - parameter    basicDescription:       音频参数
+     - parameter    componentDescription:   音频设备参数
      */
     public init?(_ inPaths: [String], outPath: String, basicDescription: AudioStreamBasicDescription) {
         
@@ -266,6 +273,9 @@ open class AudioFileMixer: AudioUnitMixerProtocol {
      */
     open func stop() -> OSStatus {
         
+        lameSwift?.stop()
+        lameSwift = nil
+        
         var status = pause()
         guard status == noErr else { return status }
         
@@ -324,6 +334,22 @@ open class AudioFileMixer: AudioUnitMixerProtocol {
     }
     
     open func audioUnit(_ mixer: AudioUnitMixer, outBusNumber: UInt32, inNumberFrames: UInt32, ioData: UnsafeMutablePointer<AudioBufferList>?) -> OSStatus {
+        
+        guard let ioDataRaw = ioData?.pointee.mBuffers.mData else { return errno }
+        guard inNumberFrames != 0 else { return errno }
+        
+        /// 获取音频数据
+        let data = Data(bytes: ioDataRaw, count: Int(ioData!.pointee.mBuffers.mDataByteSize))
+        let bytes = [UInt8](data)
+        
+        if let outputCallback = outputCallback {
+            
+            /// 回调混音数据
+            outputCallback(bytes, inNumberFrames)
+        }
+        
+        /// MP3转码
+        lameSwift?.addData(bytes)
         
         /// 写入文件
         return ExtAudioFileWrite(writeInfo.id, inNumberFrames, ioData!)

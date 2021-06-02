@@ -23,20 +23,20 @@ open class AudioFramePlayer: AudioUnitPlayerProtocol {
     /// 缓冲数据大小
     private var bufferBytesCount: Int64 = 0
     /// 录制参数
-    open private(set) var basic: AudioStreamBasicDescription
+    open internal(set) var basic: AudioStreamBasicDescription
     /// 音频设备参数
     public let component: AudioComponentDescription
     /// 播放器
-    open private(set) var player: AudioUnitPlayer?
+    open internal(set) var player: AudioUnitPlayer?
     /// 队列
     public let queue: DispatchQueue
     /// 最大帧数据大小 一般每次帧数为512/1024，帧数X通道数X位数/字节位数
     open var maxFramesBytes = 1024*2*32/8
     
     /// 是否已准备好播放
-    open private(set) var isPrepareToPlaying = false
+    open internal(set) var isPrepareToPlaying = false
     /// 是否在播放
-    open private(set) var isPlaying = false
+    open internal(set) var isPlaying = false
     
     /// 播放回调 (播放需要字节,剩余缓冲字节)
     open var callback: ((Int,Int64)->Void)?

@@ -20,6 +20,15 @@
         }
       },
       {
+        "package": "Lame",
+        "repositoryURL": "https://gitee.com/cchsora/Lame",
+        "state": {
+          "branch": "master",
+          "revision": "57c5822fdf64d9f676e84f182081a612e60fe222",
+          "version": null
+        }
+      },
+      {
         "package": "LinkedList",
         "repositoryURL": "https://gitee.com/cchsora/LinkedList",
         "state": {
