@@ -1,5 +1,5 @@
 //
-//  AudioFileTimePitch.swift
+//  AudioFileReverb.swift
 //  
 //
 //  Created by 韦烽传 on 2021/6/7.
@@ -14,7 +14,7 @@ import Print
 /**
  音频文件音调
  */
-open class AudioFileTimePitch: AudioUnitTimePitchProtocol {
+open class AudioFileReverb: AudioUnitReverbProtocol {
     
     /// 队列
     public let queue: DispatchQueue
@@ -29,8 +29,8 @@ open class AudioFileTimePitch: AudioUnitTimePitchProtocol {
     /// 写入文件信息
     open internal(set) var writeInfo: AudioFileWriteInfo
     
-    /// 音调
-    public let timePitchUnit: AudioUnitTimePitch
+    /// 音响
+    public let reverbUnit: AudioUnitReverb
     /// IO `offline` = `true` `AudioUnitOutput` 否则为 `AudioUnitPlayer`
     public let ioUnit: AudioUnitComponent.AudioUnit
     
@@ -72,16 +72,16 @@ open class AudioFileTimePitch: AudioUnitTimePitchProtocol {
         guard let write_info = AudioFileWriteInfo(outPath, basicDescription: writeASBD, converter: readASBD) else { Print.error("AudioFileWriteInfo error"); return nil }
         writeInfo = write_info
         
-        /// 音调器
-        guard let time_pitch_unit = AudioUnitTimePitch(readASBD) else { Print.error("AudioUnitTimePitch error"); return nil }
-        timePitchUnit = time_pitch_unit
+        /// 音响器
+        guard let reverb_unit = AudioUnitReverb(readASBD) else { Print.error("AudioUnitReverb error"); return nil }
+        reverbUnit = reverb_unit
         
         /// IO器
         guard let putput_unit = offline ? AudioUnitOutput(readASBD) : AudioUnitPlayer(readASBD) else { Print.error("\(offline ? "AudioUnitOutput" : "AudioUnitPlayer") error"); return nil}
         ioUnit = putput_unit
         
-        /// 连接 音调器输出（总线0） 到 IO输入（总线0）
-        let status = AudioUnitComponent.AudioUnit.connection(timePitchUnit, sourceOutBus: 0, destUnit: ioUnit, destInBus: 0)
+        /// 连接 音响器输出（总线0） 到 IO输入（总线0）
+        let status = AudioUnitComponent.AudioUnit.connection(reverbUnit, sourceOutBus: 0, destUnit: ioUnit, destInBus: 0)
         guard status == noErr else { Print.error("AudioUnit.connection error \(status)"); return nil }
     }
     
@@ -189,10 +189,10 @@ open class AudioFileTimePitch: AudioUnitTimePitchProtocol {
      */
     func startUnit() -> OSStatus {
         
-        timePitchUnit.delegate = self
+        reverbUnit.delegate = self
         
-        var status = AudioUnitInitialize(timePitchUnit.instance)
-        Print.debug("AudioUnitInitialize timePitchUnit \(status)")
+        var status = AudioUnitInitialize(reverbUnit.instance)
+        Print.debug("AudioUnitInitialize reverbUnit \(status)")
         guard status == noErr else { return status }
         status = AudioUnitInitialize(ioUnit.instance)
         Print.debug("AudioUnitInitialize ioUnit \(status)")
@@ -215,11 +215,11 @@ open class AudioFileTimePitch: AudioUnitTimePitchProtocol {
         status = AudioUnitUninitialize(ioUnit.instance)
         Print.debug("AudioUnitUninitialize ioUnit \(status)")
         guard status == noErr else { return status }
-        status = AudioUnitUninitialize(timePitchUnit.instance)
-        Print.debug("AudioUnitUninitialize timePitchUnit \(status)")
+        status = AudioUnitUninitialize(reverbUnit.instance)
+        Print.debug("AudioUnitUninitialize reverbUnit \(status)")
         guard status == noErr else { return status }
         
-        timePitchUnit.delegate = nil
+        reverbUnit.delegate = nil
         
         return status
     }
@@ -322,9 +322,9 @@ open class AudioFileTimePitch: AudioUnitTimePitchProtocol {
         }
     }
     
-    // MARK - AudioUnitTimePitchProtocol
+    // MARK - AudioUnitReverbProtocol
     
-    public func audioUnit(_ timePitch: AudioUnitTimePitch, inNumberFrames: UInt32, ioData: UnsafeMutablePointer<AudioBufferList>?) -> OSStatus {
+    public func audioUnit(_ timePitch: AudioUnitReverb, inNumberFrames: UInt32, ioData: UnsafeMutablePointer<AudioBufferList>?) -> OSStatus {
         
         guard inNumberFrames > 0 else { return errno }
         guard ioData != nil else { return errno }
