@@ -45,7 +45,7 @@ open class AudioFileReverb: AudioUnitReverbProtocol {
     /// 回调（进度，状态）
     open var callback: ((Float, OSStatus)->Void)? = nil
     /// 输出回调（数据，帧数）
-    open var outputCallback: (([UInt8], UInt32)->Void)?
+    open var outputCallback: (([[UInt8]], UInt32)->Void)?
     
     /**
      初始化
@@ -153,31 +153,42 @@ open class AudioFileReverb: AudioUnitReverbProtocol {
                 }
             }
             
+            /**
+             获取非交错多通道数据
+             */
+            func bytesAudioBuffer(_ buffer: UnsafeMutablePointer<AudioBuffer>, channels: UInt32) -> [[UInt8]] {
+                
+                var list: [[UInt8]] = []
+                
+                for i in 0..<Int(channels) {
+                    
+                    var bytes = [UInt8].init(repeating: 0, count: Int(buffer[i].mDataByteSize))
+                    memcpy(&bytes, buffer[i].mData, Int(buffer[i].mDataByteSize))
+                    
+                    list.append(bytes)
+                }
+                
+                return list
+            }
+            
             callocAudioBuffer(&ioData.mBuffers, channels: ioData.mNumberBuffers)
             
             /// 渲染
-            let status = AudioUnitRender(ioUnit.instance, &ioActionFlags, &inTimeStamp, inOutputBusNumber, inNumberFrames, &ioData)
+            var status = AudioUnitRender(ioUnit.instance, &ioActionFlags, &inTimeStamp, inOutputBusNumber, inNumberFrames, &ioData)
             
-            guard let ioDataRaw = ioData.mBuffers.mData else { Print.error("ioData.mBuffers.mData nil"); return }
-            guard inNumberFrames != 0 else { Print.error("inNumberFrames == 0"); return }
-            
-            /// 获取音频数据
-            let data = Data(bytes: ioDataRaw, count: Int(ioData.mBuffers.mDataByteSize))
-            let bytes = [UInt8](data)
-            
-            outputCallback?(bytes, inNumberFrames)
+            guard status == noErr else { Print.error("AudioUnitRender \(status)"); freeAudioBuffer(&ioData.mBuffers, channels: ioData.mNumberBuffers); return }
+            guard inNumberFrames != 0 else { Print.error("inNumberFrames == 0"); freeAudioBuffer(&ioData.mBuffers, channels: ioData.mNumberBuffers); return }
             
             /// 写入文件
-            if ExtAudioFileWrite(writeInfo.id, inNumberFrames, &ioData) != noErr {
-                
-                Print.error("ExtAudioFileWrite \(status)")
-            }
+            status = ExtAudioFileWrite(writeInfo.id, inNumberFrames, &ioData)
+            
+            guard status == noErr else { Print.error("ExtAudioFileWrite \(status)"); freeAudioBuffer(&ioData.mBuffers, channels: ioData.mNumberBuffers); return }
+            
+            outputCallback?(bytesAudioBuffer(&ioData.mBuffers, channels: ioData.mNumberBuffers), inNumberFrames)
             
             freeAudioBuffer(&ioData.mBuffers, channels: ioData.mNumberBuffers)
             
             callback?(Float(offsetFrame)/Float(info.frames), status)
-            
-            guard status == noErr else { Print.error("AudioUnitRender \(status)"); return }
             
             /// 加这个才能调用下一次混音输入
             inTimeStamp.mSampleTime += Float64(inNumberFrames)
