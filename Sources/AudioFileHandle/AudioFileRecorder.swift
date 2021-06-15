@@ -223,6 +223,9 @@ open class AudioFileRecorder: AudioUnitRecorderProtocol {
             
             /// 写入数据
             ExtAudioFileWrite(file, ioNumberFrames, &buffer)
+            
+            free(buffer.mBuffers.mData)
+            buffer.mBuffers.mData = nil
         }
         else {
             
