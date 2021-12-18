@@ -17,7 +17,7 @@ open class AudioFilePlayer: AudioUnitPlayerProtocol {
     
     /// 队列
     public let queue: DispatchQueue
-    /// 音频流录制器
+    /// 音频流播制器
     open var player: AudioUnitPlayer?
     /// 文件地址
     public let url: CFURL
