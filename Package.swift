@@ -20,7 +20,7 @@ let package = Package(
         .package(url: "https://gitee.com/cchsora/AudioUnitComponent", .branch("master")),
         .package(url: "https://gitee.com/cchsora/AudioFileInfo", .branch("master")),
         .package(url: "https://gitee.com/cchsora/WebRTCNS", .branch("master")),
-        .package(url: "https://gitee.com/cchsora/Lame", .branch("master")),
+        .package(url: "https://gitee.com/cchsora/Lame", .branch("1.0_noliblame")),
         .package(url: "https://gitee.com/cchsora/LinkedList", .branch("master")),
         .package(url: "https://gitee.com/cchsora/Print", .branch("master")),
     ],

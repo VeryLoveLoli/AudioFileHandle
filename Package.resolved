@@ -23,8 +23,8 @@
         "package": "Lame",
         "repositoryURL": "https://gitee.com/cchsora/Lame",
         "state": {
-          "branch": "master",
-          "revision": "57c5822fdf64d9f676e84f182081a612e60fe222",
+          "branch": "1.0_noliblame",
+          "revision": "8e0d4926a1494e6c823cde91ac2f76610a5ffc80",
           "version": null
         }
       },
